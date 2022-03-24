@@ -1,0 +1,80 @@
+﻿@page "/blackjack"
+
+@using Black_Jack
+@using System.Threading
+
+<div class="">
+    <h3>BlackJack</h3>
+</div>
+
+
+<div class="container p-5">
+    <div class="row">
+        <div class="col-2">
+            <button class="btn btn-primary" style="color:white" @onclick="deal_card" value="click">Deal</button>
+        </div>
+        <div class="col-3">
+            <p>@status</p>
+            <p>@card</p>
+            <p>@score</p>
+        </div>
+        <div class="col-5">
+            <table class="table table-progress-bar-striped table-bordered">
+                <thead>
+                    <tr>
+                        <th>Card Value</th>
+                        <th>Suit</th>
+                        <th>Score</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var dealtcard in dealtCards)
+                    {
+                        <tr>
+                            <td>@dealtcard.CardValue</td>
+                            <td>@dealtcard.Suit</td>
+                            <td>@dealtcard.Score</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+
+@code {
+    List<Card> dealtCards = new List<Card>();
+    public string status { get; set; } = "";
+    public string card { get; set; } = "";
+    public int score { get; set; } = 0;
+    public Card newCard { get; set; }
+    Deck deck = new Deck();
+    protected override async Task OnInitializedAsync()
+    {
+        deck.Shuffle();
+    }
+    public virtual void deal_card()
+    {
+        newCard = deck.DealCard();
+        dealtCards.Add(newCard);
+        card = newCard.ToString();
+        score += newCard.Score;
+
+        if (score < 21)
+        {
+            status = "Playing";
+        }
+        else if (score > 21)
+        {
+            status = "Busted";
+            deck.Shuffle();
+            score = 0;
+            dealtCards.Clear();
+        }
+        else if (score == 21)
+        {
+            status = "Black Jack";
+        }
+    }
+}
