@@ -1,23 +1,37 @@
 ﻿@page "/blackjack"
 
-@using Black_Jack
-@using System.Threading
+@using Black_Jack_Blazor.Data.BlackJack
 
-<div class="">
-    <h3>BlackJack</h3>
+<div class="p-2">
+    <h1>BlackJack</h1>
+    <h3>Money: $@money</h3>
+    <h3>Bet: $@betAmount</h3>
+    <h3>Status: @state</h3>
+    <h3>Score: @score</h3>
 </div>
 
 
-<div class="container p-5">
+<div class="container-fluid">
     <div class="row">
-        <div class="col-2">
-            <button class="btn btn-primary" style="color:white" @onclick="deal_card" value="click">Deal</button>
+        <div class="col-1">
+            @if (state == GameState.InProgress)
+            {
+                <button class="btn btn-primary" @onclick="stand" value="click">Deal</button>
+                <button class="btn btn-primary" @onclick="hit" value="click">Deal</button>
+            }
+            else if (state == GameState.NotStarted || state == GameState.Betting)
+            {
+                <button class="btn btn-primary" @onclick="deal_card" value="click">Deal</button>
+            }
         </div>
-        <div class="col-3">
-            <p>@status</p>
-            <p>@card</p>
-            <p>@score</p>
+        <div class="col-1">
+            <button class="p-1 btn btn-primary" @onclick="(() => bet(1))">Bet $1</button>
+            <button class="btn btn-primary" @onclick="(() => bet(5))">Bet $5</button>
+            <button class="btn btn-primary" @onclick="(() => bet(10))">Bet $10</button>
+            <button class="btn btn-primary" @onclick="(() => bet(20))">Bet $20</button>
+            <button class="btn btn-primary" @onclick="(() => bet(50))">Bet $50</button>
         </div>
+
         <div class="col-5">
             <table class="table table-progress-bar-striped table-bordered">
                 <thead>
@@ -45,36 +59,69 @@
 
 @code {
     List<Card> dealtCards = new List<Card>();
-    public string status { get; set; } = "";
+    public int money { get; set; } = 1000;
+    public int betAmount { get; set; } = 0;
     public string card { get; set; } = "";
     public int score { get; set; } = 0;
     public Card newCard { get; set; }
     Deck deck = new Deck();
+    GameState state = GameState.NotStarted;
+
+
     protected override async Task OnInitializedAsync()
     {
         deck.Shuffle();
     }
-    public virtual void deal_card()
-    {
-        newCard = deck.DealCard();
-        dealtCards.Add(newCard);
-        card = newCard.ToString();
-        score += newCard.Score;
 
-        if (score < 21)
+    public void deal_card()
+    {
+        if (betAmount > 0)
         {
-            status = "Playing";
+            newCard = deck.DealCard();
+            dealtCards.Add(newCard);
+            card = newCard.ToString();
+            score += newCard.Score;
+
+            if (score < 21)
+            {
+                state = GameState.InProgress;
+            }
+            else if (score > 21)
+            {
+                state = GameState.Busted;
+                deck.Shuffle();
+                score = 0;
+                dealtCards.Clear();
+                money = money - betAmount;
+                betAmount = 0;
+            }
+            else if (score == 21)
+            {
+                state = GameState.BlackJack;
+            }
         }
-        else if (score > 21)
+        else
         {
-            status = "Busted";
-            deck.Shuffle();
-            score = 0;
-            dealtCards.Clear();
+            state = GameState.Betting;
         }
-        else if (score == 21)
+
+    }
+
+    public void bet(int amount)
+    {
+        if (money >= amount)
         {
-            status = "Black Jack";
+            betAmount += amount;
         }
+    }
+
+    public void stand()
+    {
+
+    }
+
+    public void hit()
+    {
+        
     }
 }

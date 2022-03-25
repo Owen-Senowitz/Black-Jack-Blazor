@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Black_Jack
+namespace Black_Jack_Blazor.Data.BlackJack
 {
     public enum SuitType
     {

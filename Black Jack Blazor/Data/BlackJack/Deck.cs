@@ -4,13 +4,12 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Black_Jack
+namespace Black_Jack_Blazor.Data.BlackJack
 {
     public class Deck
     {
         public List<Card> deck { get; set; }
         private int currentCard;
-        private const int maxCards = 52;
         private Random ranNum;
 
         public Deck()
